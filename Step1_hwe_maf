@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# 使用seq(1 22)遍历所有的染色体文件
+for i in $(seq 1 22)
+do
+    echo "Processing chromosome $i with 48 threads"
+
+    # 使用PLINK2对每个染色体进行HWE和MAF过滤，并使用48个线程
+    plink2 --bfile chr${i}_mind_filtered \
+           --hwe 1e-3 \
+           --maf 0.01 \
+           --make-bed \
+           --threads 48 \
+           --out chr${i}_filtered_hwe_maf
+
+    echo "Chromosome $i processing done"
+done
