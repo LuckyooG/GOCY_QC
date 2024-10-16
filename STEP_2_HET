@@ -83,3 +83,13 @@ rm(list = ls())
 --------------------------- linux -----------------------------
 #生成outlier样本编号：
 awk -F, 'NR > 1 {print $1, $2}' heterozygosity_outlier.txt | sort | uniq > outliers_fid_iid.txt
+
+#run --geno 0.02 check
+
+for i in $(seq 1 22); do
+  plink --bfile chr${i}_mind_filtered \
+        --remove outliers_fid_iid.txt \
+        --geno 0.02 \
+        --make-bed \
+        --out chr${i}_geno_filtered
+done
