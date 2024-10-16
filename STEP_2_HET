@@ -1,0 +1,77 @@
+# 加载 data.table 包
+library(data.table)
+
+# 设置工作目录
+setwd("...")
+
+# 列出所有1-22染色体的.het文件
+het_files <- list.files(pattern = "^chr([1-9]|1[0-9]|2[0-2])_het\\.het$")
+
+print(het_files)
+# 读取所有文件并合并
+merged_data <- rbindlist(lapply(het_files, fread))
+head(merged_data)
+# 将合并后的数据写入新文件
+fwrite(merged_data, "merged_chr1_22.het", sep = "\t")
+
+#对F值进行可视化
+het_data<-fread("merged_chr1_22.het", header=TRUE)
+pdf("het_histogram.pdf") #indicates pdf format and gives title to file
+hist(het_data$F, main = "Histogram of Heterozygosity", xlab = "F value", ylab = "Frequency")
+dev.off() 
+
+# 计算杂合率并可视化
+merged_data[, HET_rate := (OBS_CT - `O(HOM)`) / OBS_CT]
+
+# 打印前几行结果
+head(merged_data)
+
+# 将结果写入新文件
+fwrite(merged_data, "heterozygosity_rate_results.txt", sep = "\t")
+pdf("Het_rate_histogram.pdf") #indicates pdf format and gives title to file
+hist(merged_data$HET_rate, main = "Histogram of Heterozygosity Rate", xlab = "Heterozygosity Rate", ylab = "Frequency")
+dev.off() 
+
+#定义outlier
+# 计算杂合率的均值和标准差
+mean_het <- mean(merged_data$HET_rate, na.rm = TRUE)
+sd_het <- sd(merged_data$HET_rate, na.rm = TRUE)
+
+# 定义上下限
+upper_limit <- mean_het + 3 * sd_het
+lower_limit <- mean_het - 3 * sd_het
+
+# 标记超过均值 +/- 3 SD 的个体为 outlier
+merged_data[, outlier := ifelse(HET_rate > upper_limit | HET_rate < lower_limit, TRUE, FALSE)]
+
+# 打印前几行结果
+head(merged_data)
+
+# 将结果写入新文件
+fwrite(merged_data, "heterozygosity_rate_outliers.txt", sep = "\t")
+# 保存为 CSV 文件
+fwrite(merged_data, "heterozygosity_rate_outliers.csv", sep = ",")
+
+# 计算偏离程度 HET_DST
+merged_data[, HET_DST := (HET_rate - mean_het) / sd_het]
+
+# 打印前几行结果
+head(merged_data)
+
+# 将包含 HET_DST 的结果写入 CSV 文件
+fwrite(merged_data, "heterozygosity_rate_with_dst.txt", sep = ",")
+#可视化
+pdf("Het_DST_histogram.pdf") 
+hist(merged_data$HET_DST, main = "Histogram of HET_DST", xlab = "HET_DST", ylab = "Frequency")
+dev.off() 
+
+#只提取离群值
+outliers_data <- merged_data[outlier == TRUE]
+# 查看提取出的前几行
+head(outliers_data)
+#可视化
+pdf("Het_outlier_DST_histogram.pdf") 
+hist(outliers_data$HET_DST, main = "Histogram of HET_Outlier_DST", xlab = "HET_Outlier_DST", ylab = "Frequency")
+dev.off() 
+
+rm(list = ls())
