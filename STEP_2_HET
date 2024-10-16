@@ -67,6 +67,8 @@ dev.off()
 
 #只提取离群值
 outliers_data <- merged_data[outlier == TRUE]
+fwrite(outliers_data, "heterozygosity_outlier.txt", sep = ",")
+
 # 查看提取出的前几行
 head(outliers_data)
 #可视化
