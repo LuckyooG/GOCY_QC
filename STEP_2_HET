@@ -100,3 +100,12 @@ for i in $(seq 1 22); do
         --genome \
         --out chr${i}_genome_results
 done
+
+
+
+-------------------- KING -----------------------------
+#计算亲缘关系
+
+for i in $(seq 1 22); do
+  king -b chr${i}_geno_filtered.bed --kinship --nosex --cpus 4 --prefix king_chr${i}_kinship
+done
