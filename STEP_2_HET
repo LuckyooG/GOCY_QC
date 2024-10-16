@@ -93,3 +93,10 @@ for i in $(seq 1 22); do
         --make-bed \
         --out chr${i}_geno_filtered
 done
+
+# 计算IBD
+for i in $(seq 1 22); do
+  plink --bfile chr${i}_geno_filtered \
+        --genome \
+        --out chr${i}_genome_results
+done
