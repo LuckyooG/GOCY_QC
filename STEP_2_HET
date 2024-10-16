@@ -1,3 +1,4 @@
+--------------------------- R ---------------------------------------
 # 加载 data.table 包
 library(data.table)
 
@@ -77,3 +78,8 @@ hist(outliers_data$HET_DST, main = "Histogram of HET_Outlier_DST", xlab = "HET_O
 dev.off() 
 
 rm(list = ls())
+
+
+--------------------------- linux -----------------------------
+#生成outlier样本编号：
+awk -F, 'NR > 1 {print $1, $2}' heterozygosity_outlier.txt | sort | uniq > outliers_fid_iid.txt
